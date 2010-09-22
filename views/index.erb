@@ -1,0 +1,85 @@
+<html>
+
+<body>
+	<script src="http://code.jquery.com/jquery-1.4.2.min.js"/>
+	<style> code {width:400px; overflow:auto; display:block;}</style>
+	<form  action="/" method="get">
+		Num assets: <input type="text" name="limit" value="<%= @limit %>"> 
+		Type: <select name="type"><option value="<%= REG_ASSET_TYPE %>">Reg Center</option><option value="<%=WORKS_ASSET_TYPE%>" <% if @type==WORKS_ASSET_TYPE%>selected<% end %>>Active Works</option></select>
+		<input type="submit">
+	</form>
+<table border="1">
+	<tr>
+		<th>asset_id</th>
+		<th>local_id</th>
+		<th>key</th>
+		<th>ATS</th>
+		<th><% if @type==REG_ASSET_TYPE %>RegCenter<% else %>ActiveWorks<% end %></th>
+		<th>Search</th>
+	</tr>
+
+<% (0..@limit.to_i-1).each do |num|
+	asset = @assets[num]
+	if asset==nil
+		%>
+		<tr>
+			<td valign="top"><%= asset %></td>
+			<td valign="top">error loading from ATS</td>
+			<td valign="top"></td>
+		</tr>
+
+		<%
+		
+		break
+	end
+	asset_name = asset.downcase.gsub("-","") 
+	
+	ats = cache "ats_#{asset_name}" do
+     	ass = Active::Services::ATS.find_by_id(asset)
+		ass.title
+		ass
+  	end
+	local_id = ats.data[:substitution_url]
+
+	reg = cache "reg_#{asset_name}" do
+		local_id = ats.data[:substitution_url]
+		if @type==REG_ASSET_TYPE
+			Active::Services::RegCenter.find_by_id(local_id) 
+		else
+			Active::Services::ActiveWorks.find_by_id(local_id) 
+		end
+  	end
+
+	search = cache "search_#{asset_name}" do
+		Active::Services::Search.search({:asset_ids=>[ats.asset_id]}) 
+#		Active::Services::Search.search({:keywords=>[ats.asset_id]}) 
+  	end
+
+	keys=[:title, :url, :categories, :address, :start_date, :start_time, :end_time, :end_date, :category, :desc, :asset_id, :asset_type_id, :data]
+
+%>
+	<% keys.each do |key| %>
+	<tr>
+		<td valign="top"><%= asset %></td>
+		<td valign="top"><%= local_id %></td>
+		<td valign="top">:<%= key %></td>
+		<td valign="top"> <code><%= (ats.send key).inspect  if ats!=nil %></code></td>
+		<td valign="top">
+			<code>
+				<% begin %>
+					<%= (reg.send key).inspect %>
+				<% rescue %>
+					error
+				<% end %>
+				<code>
+		</td>
+		<td valign="top"><code><%= (search.results.first.send key).inspect if search.results.length>0 %></code></td>
+	</tr>
+	<% end %>
+
+
+<% end %>
+</table>
+
+</body>
+</html>
