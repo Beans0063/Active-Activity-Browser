@@ -1,22 +1,117 @@
+<!DOCTYPE html>
 <html>
+	<head>
+		<script src="http://code.jquery.com/jquery-1.4.2.min.js"></script>
+		<script type="text/javascript" charset="utf-8">
+			$(function() {
+				
+				function hideAll() {
+					$(".title, .categories, .url, .address, .start_date, .end_date, .start_time, .end_time, .category, .desc, .data").css("display", "none");
+					$(".asset_id, .asset_type_id").css("display", "none");
+				}
+				
+				$("#title_btn").click(function(e){
+					hideAll();
+					$(".title").css("display", "block");
+					return false;
+				});
 
+				$("#categories_btn").click(function(e){
+					hideAll();
+					$(".categories").css("display", "block");
+					return false;					
+				});
+
+				$("#url_btn").click(function(e){
+					hideAll();
+					$(".url").css("display", "block");
+					return false;					
+				});
+
+				$("#address_btn").click(function(e){
+					hideAll();
+					$(".address").css("display", "block");
+					return false;					
+				});
+
+				$("#start_date_btn").click(function(e){
+					hideAll();
+					$(".start_date").css("display", "block");
+					return false;					
+				});
+
+				$("#end_date_btn").click(function(e){
+					hideAll();
+					$(".end_date").css("display", "block");
+					return false;					
+				});
+
+				$("#start_time_btn").click(function(e){
+					hideAll();
+					$(".start_time").css("display", "block");
+					return false;					
+				});
+
+				$("#end_time_btn").click(function(e){
+					hideAll();
+					$(".end_time").css("display", "block");
+					return false;					
+				});
+				
+				$("#category_btn").click(function(e){
+					hideAll();
+					$(".category").css("display", "block");
+					return false;					
+				});
+				
+				$("#desc_btn").click(function(e){
+					hideAll();
+					$(".desc").css("display", "block");
+					return false;					
+				});
+				
+				$("#data_btn").click(function(e){
+					hideAll();
+					$(".data").css("display", "block");
+					return false;					
+				});
+				
+			});
+		</script>
+		<style type="text/css" media="screen">
+			code {width:400px; overflow:auto; display:block;}		
+		</style>
+	</head>
 <body>
-	<script src="http://code.jquery.com/jquery-1.4.2.min.js"/>
-	<style> code {width:400px; overflow:auto; display:block;}</style>
 	<form  action="/" method="get">
 		Num assets: <input type="text" name="limit" value="<%= @limit %>"> 
-		Type: <select name="type"><option value="<%= REG_ASSET_TYPE %>">Reg Center</option><option value="<%=WORKS_ASSET_TYPE%>" <% if @type==WORKS_ASSET_TYPE%>selected<% end %>>Active Works</option></select>
-		<input type="submit">
+		Type: <select name="type"><option value="<%= REG_ASSET_TYPE %>">Reg Center</option><option value="<%=WORKS_ASSET_TYPE%>" <% if @type==WORKS_ASSET_TYPE %>selected<% end %>>Active Works</option></select>
+		<input type="submit" />
 	</form>
-<table border="1">
-	<tr>
-		<th>asset_id</th>
-		<th>local_id</th>
-		<th>key</th>
-		<th>ATS</th>
-		<th><% if @type==REG_ASSET_TYPE %>RegCenter<% else %>ActiveWorks<% end %></th>
-		<th>Search</th>
-	</tr>
+	<div id="name">
+		<ul>
+			<li><a href="#" id="title_btn">title</a></li>
+			<li><a href="#" id="categories_btn">categories</a></li>
+			<li><a href="#" id="category_btn">category</a></li>
+			<li><a href="#" id="url_btn">url</a></li>
+			<li><a href="#" id="address_btn">address</a></li>
+			<li><a href="#" id="start_date_btn">start_date</a></li>
+			<li><a href="#" id="end_date_btn">end_date</a></li>
+			<li><a href="#" id="start_time_btn">start_time</a></li>
+			<li><a href="#" id="end_time_btn">end_time</a></li>
+			<li><a href="#" id="desc_btn">desc</a></li>
+			<li><a href="#" id="data_btn">data</a></li>
+		</ul>
+	</div>
+	<table border="1">
+		<tr>
+			<th>asset_id</th>
+			<th>local_id</th>
+			<th>key</th>
+			<th>ATS</th>
+			<th><% if @type==REG_ASSET_TYPE %>RegCenter<% else %>ActiveWorks<% end %></th>
+			<th>Search</th>
+		</tr>
 
 <% (0..@limit.to_i-1).each do |num|
 	asset = @assets[num]
@@ -51,7 +146,7 @@
   	end
 
 	search = cache "search_#{asset_name}" do
-		Active::Services::Search.search({:asset_ids=>[ats.asset_id]}) 
+		Active::Services::Search.search({:asset_ids=>[ats.asset_id], :start_date=>"01/01/2000"}) 
 #		Active::Services::Search.search({:keywords=>[ats.asset_id]}) 
   	end
 
@@ -59,19 +154,19 @@
 
 %>
 	<% keys.each do |key| %>
-	<tr>
+	<tr class="<%= key %>">
 		<td valign="top"><%= asset %></td>
 		<td valign="top"><%= local_id %></td>
 		<td valign="top">:<%= key %></td>
 		<td valign="top"> <code><%= (ats.send key).inspect  if ats!=nil %></code></td>
 		<td valign="top">
+			<% begin %>
 			<code>
-				<% begin %>
-					<%= (reg.send key).inspect %>
-				<% rescue %>
-					error
-				<% end %>
-				<code>
+				<%= (reg.send key).inspect %>
+			</code>
+					<% rescue %>
+						error
+					<% end %>
 		</td>
 		<td valign="top"><code><%= (search.results.first.send key).inspect if search.results.length>0 %></code></td>
 	</tr>

@@ -5,6 +5,8 @@
   require 'Active'
   require 'sinatra/memcache'
   require 'sequel'
+#  require 'reverse_markdown'
+  require 'sanitize'
   
   REG_ASSET_TYPE="EA4E860A-9DCD-4DAA-A7CA-4A77AD194F65"
   WORKS_ASSET_TYPE="DFAA997A-D591-44CA-9FB7-BF4A4C8984F1"
@@ -22,6 +24,7 @@
   end
     
   get_or_post '/' do
+    #ReverseMarkdown.new.parse_string("123") 
     @limit = params[:limit] || 5
     @type = params[:type] || REG_ASSET_TYPE
     calendar_events = DB[:calendar_events]
