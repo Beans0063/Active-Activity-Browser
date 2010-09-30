@@ -75,6 +75,17 @@
 					$(".data").css("display", "block");
 					return false;					
 				});
+
+				$("#contact_email_btn").click(function(e){
+					hideAll();
+					$(".contact_email").css("display", "block");
+					return false;					
+				});
+				$("#contact_name_btn").click(function(e){
+					hideAll();
+					$(".contact_name").css("display", "block");
+					return false;					
+				});
 				
 			});
 		</script>
@@ -100,6 +111,8 @@
 			<li><a href="#" id="start_time_btn">start_time</a></li>
 			<li><a href="#" id="end_time_btn">end_time</a></li>
 			<li><a href="#" id="desc_btn">desc</a></li>
+			<li><a href="#" id="contact_name_btn">contact_name</a></li>
+			<li><a href="#" id="contact_email_btn">contact_email</a></li>
 			<li><a href="#" id="data_btn">data</a></li>
 		</ul>
 	</div>
@@ -117,11 +130,6 @@
 	asset = @assets[num]
 	if asset==nil
 		%>
-		<tr>
-			<td valign="top"><%= asset %></td>
-			<td valign="top">error loading from ATS</td>
-			<td valign="top"></td>
-		</tr>
 
 		<%
 		
@@ -150,7 +158,7 @@
 #		Active::Services::Search.search({:keywords=>[ats.asset_id]}) 
   	end
 
-	keys=[:title, :url, :categories, :address, :start_date, :start_time, :end_time, :end_date, :category, :desc, :asset_id, :asset_type_id, :data]
+	keys=[:title, :url, :categories, :address, :start_date, :start_time, :end_time, :end_date, :category, :desc, :asset_id, :asset_type_id, :data, :contact_name, :contact_email]
 
 %>
 	<% keys.each do |key| %>
@@ -158,17 +166,18 @@
 		<td valign="top"><%= asset %></td>
 		<td valign="top"><%= local_id %></td>
 		<td valign="top">:<%= key %></td>
-		<td valign="top"> <code><%= (ats.send key).inspect  if ats!=nil %></code></td>
+		<td valign="top"> <code><%= (ats.send key).inspect  if ats!=nil %> <%= (ats.send key).class  if ats!=nil %></code></td>
 		<td valign="top">
 			<% begin %>
 			<code>
 				<%= (reg.send key).inspect %>
+				<%= (reg.send key).class %>
 			</code>
 					<% rescue %>
 						error
 					<% end %>
 		</td>
-		<td valign="top"><code><%= (search.results.first.send key).inspect if search.results.length>0 %></code></td>
+		<td valign="top"><code><%= (search.results.first.send key).to_yaml if search.results.length>0 %> <%= (search.results.first.send key).class if search.results.length>0 %></code></td>
 	</tr>
 	<% end %>
 

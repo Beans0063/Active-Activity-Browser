@@ -17,7 +17,11 @@
     DB = Sequel.connect("#{settings['adapter']}://#{settings['username']}:#{settings['password']}@#{settings['host']}/#{settings['database']}", :max_connections=>8, :pool_timeout=>10)
   end
   
-
+  helpers do
+    include Rack::Utils
+    alias_method :h, :escape_html
+  end
+  
   def get_or_post(path, opts={}, &block)
     get(path, opts, &block)
     post(path, opts, &block)
