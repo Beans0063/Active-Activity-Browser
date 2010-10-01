@@ -7,6 +7,7 @@
   require 'sequel'
 #  require 'reverse_markdown'
   require 'sanitize'
+  include Active::Services
   
   REG_ASSET_TYPE="EA4E860A-9DCD-4DAA-A7CA-4A77AD194F65"
   WORKS_ASSET_TYPE="DFAA997A-D591-44CA-9FB7-BF4A4C8984F1"
@@ -33,7 +34,17 @@
     @type = params[:type] || REG_ASSET_TYPE
     calendar_events = DB[:calendar_events]
     result = calendar_events.select(:asset_id).where("asset_type_id = '#{@type}'").limit(@limit)
-    @assets = result.collect {|r| r[:asset_id]}
+#    @assets = result.collect {|r| r[:asset_id]}
+    #@activities = result.collect {|r| Activity.new(ATS.find_by_id(r[:asset_id]))}
+    @activities=[]
+    result.each do |r|
+      	activity = cache "activity_#{r[:asset_id]}" do
+          Activity.new(ATS.find_by_id(r[:asset_id]),true)
+        end
+        @activities << activity
+    end
+
+
 
     erb :index
 

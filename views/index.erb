@@ -121,63 +121,35 @@
 			<th>asset_id</th>
 			<th>local_id</th>
 			<th>key</th>
+			<th>Activity</th>
 			<th>ATS</th>
 			<th><% if @type==REG_ASSET_TYPE %>RegCenter<% else %>ActiveWorks<% end %></th>
 			<th>Search</th>
 		</tr>
 
-<% (0..@limit.to_i-1).each do |num|
-	asset = @assets[num]
-	if asset==nil
-		%>
-
-		<%
-		
-		break
-	end
-	asset_name = asset.downcase.gsub("-","") 
-	
-	ats = cache "ats_#{asset_name}" do
-     	ass = Active::Services::ATS.find_by_id(asset)
-		ass.title
-		ass
-  	end
-	local_id = ats.data[:substitution_url]
-
-	reg = cache "reg_#{asset_name}" do
-		local_id = ats.data[:substitution_url]
-		if @type==REG_ASSET_TYPE
-			Active::Services::RegCenter.find_by_id(local_id) 
-		else
-			Active::Services::ActiveWorks.find_by_id(local_id) 
-		end
-  	end
-
-	search = cache "search_#{asset_name}" do
-		Active::Services::Search.search({:asset_ids=>[ats.asset_id], :start_date=>"01/01/2000"}) 
-#		Active::Services::Search.search({:keywords=>[ats.asset_id]}) 
-  	end
+<% @activities.each do  |activity|
 
 	keys=[:title, :url, :categories, :address, :start_date, :start_time, :end_time, :end_date, :category, :desc, :asset_id, :asset_type_id, :data, :contact_name, :contact_email]
 
 %>
 	<% keys.each do |key| %>
 	<tr class="<%= key %>">
-		<td valign="top"><%= asset %></td>
-		<td valign="top"><%= local_id %></td>
+		<td valign="top"><%= activity.primary.asset_id %></td>
+		<td valign="top"><%= activity.ats.substitutionUrl %></td>
 		<td valign="top">:<%= key %></td>
-		<td valign="top"> <code><%= (ats.send key).inspect  if ats!=nil %> <%= (ats.send key).class  if ats!=nil %></code></td>
+		<td valign="top"> <code><%= (activity.send key).inspect  if activity!=nil %> <%= (activity.send key).class  if activity!=nil %></code></td>
+		<td valign="top"> <code><%= (activity.ats.send key).inspect  if activity.ats!=nil %> <%= (activity.ats.send key).class  if activity.ats!=nil %></code></td>
 		<td valign="top">
 			<% begin %>
 			<code>
-				<%= (reg.send key).inspect %>
-				<%= (reg.send key).class %>
+				<%= (activity.primary.send key).inspect %>
+				<%= (activity.primary.send key).class %>
 			</code>
 					<% rescue %>
 						error
 					<% end %>
 		</td>
-		<td valign="top"><code><%= (search.results.first.send key).to_yaml if search.results.length>0 %> <%= (search.results.first.send key).class if search.results.length>0 %></code></td>
+		<td valign="top"><code><%= (activity.gsa.send key).to_yaml if activity.gsa!=nil %> <%= (activity.gsa.send key).class if activity.gsa!=nil %></code></td>
 	</tr>
 	<% end %>
 
